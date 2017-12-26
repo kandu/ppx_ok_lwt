@@ -16,6 +16,7 @@ build: [
 ]
 depends: [
   "ocaml-migrate-parsetree" {>="0.6"}
+  "ppx_tools_versioned"
   "jbuilder" {build}
 ]
 available: [ocaml-version >= "4.02.3"]
