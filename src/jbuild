@@ -1,0 +1,14 @@
+(jbuild_version 1)
+
+(library
+ ((name ppx_lwts)
+  (public_name ppx_lwts)
+  (flags (:standard -safe-string))
+  (synopsis "A ppx syntax extension for sequence semantics of lwt")
+  (libraries
+    ( compiler-libs.common
+      ocaml-migrate-parsetree
+      ppx_tools_versioned))
+  (preprocess (pps (ppx_tools_versioned.metaquot_403)))
+  (kind ppx_rewriter)))
+
