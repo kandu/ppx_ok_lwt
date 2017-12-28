@@ -11,29 +11,37 @@ open Location
 let debug= ref true
 let strict= ref true
 
-let lwts mapper expr=
+let lwts mapper expr trigger_loc=
   match expr with
   | [%expr [%e? lhs]; [%e? rhs]] ->
-    let pat = if !strict then [%pat? ()] else [%pat? _] in
+    let pos_trigger= trigger_loc.Location.loc_start.Lexing.pos_cnum
+    and pos_lhs= lhs.pexp_loc.Location.loc_start.Lexing.pos_cnum in
+    let bind expr lhs rhs=
+      let pat= if !strict then [%pat? ()] else [%pat? _] in
+      if !debug then
+        [%expr Lwt.backtrace_bind
+          (fun exn -> try raise exn with exn -> exn)
+          [%e lhs]
+          (fun [%p pat] -> [%e rhs])]
+          [@metaloc expr.pexp_loc]
+      else
+        [%expr Lwt.bind
+          [%e lhs]
+          (fun [%p pat] -> [%e rhs])]
+          [@metaloc expr.pexp_loc]
+    in
     let rec gen_sequence mapper expr=
       match expr with
       | [%expr [%e? lhs]; [%e? rhs]] ->
         let lhs, rhs= mapper.expr mapper lhs, gen_sequence mapper rhs in
-        if !debug then
-          [%expr Lwt.backtrace_bind
-            (fun exn -> try raise exn with exn -> exn)
-            [%e lhs]
-            (fun [%p pat] -> [%e rhs])]
-            [@metaloc expr.pexp_loc]
-        else
-          [%expr Lwt.bind
-            [%e lhs]
-            (fun [%p pat] -> [%e rhs])]
-            [@metaloc expr.pexp_loc]
+        bind expr lhs rhs
       | _ -> mapper.expr mapper expr
     in
-    gen_sequence mapper expr
-
+    if pos_trigger > pos_lhs then (* wag tail syntax *)
+      let lhs, rhs= mapper.expr mapper lhs, mapper.expr mapper rhs in
+      bind expr lhs rhs
+    else
+      gen_sequence mapper expr
   | _ -> mapper.expr mapper expr
 
 
@@ -41,14 +49,19 @@ let lwts_mapper _config _cookies=
   { default_mapper with
     expr= fun mapper expr->
       match expr with
-      | [%expr [%lwts [%e? expr]]] ->
-        lwts mapper expr
+      | { pexp_desc=
+            Pexp_extension (
+              {txt="lwts"; loc= trigger_loc},
+              PStr[{pstr_desc= Pstr_eval (exp, _);_}]);
+          _
+        }->
+        lwts mapper exp trigger_loc
       | _ -> default_mapper.expr mapper expr
   }
 
 let args = Arg.[
-  "-no-debug", Clear debug, "disable debug mode";
-  "-no-strict", Clear strict, "allow non-unit sequence operations";
+  "-no-debug", Clear debug, " disable debug mode";
+  "-no-strict", Clear strict, " allow non-unit sequence operations";
 ]
 
 let ()= Driver.register
