@@ -60,8 +60,8 @@ let lwts_mapper _config _cookies=
   }
 
 let args = Arg.[
-  "-no-debug", Clear debug, " disable debug mode";
-  "-no-strict", Clear strict, " allow non-unit sequence operations";
+  "--lwts-no-debug", Clear debug, " disable debug mode";
+  "--lwts-no-strict", Clear strict, " allow non-unit sequence operations";
 ]
 
 let ()= Driver.register
