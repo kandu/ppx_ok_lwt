@@ -11,13 +11,24 @@ open Location
 let debug= ref true
 let strict= ref true
 
+let with_loc loc f=
+  let tmp_loc= !default_loc in
+  default_loc:= loc;
+  let r= f () in
+  default_loc:= tmp_loc;
+  r
+
 let lwts mapper expr trigger_loc=
   match expr with
   | [%expr [%e? lhs]; [%e? rhs]] ->
     let pos_trigger= trigger_loc.Location.loc_start.Lexing.pos_cnum
     and pos_lhs= lhs.pexp_loc.Location.loc_start.Lexing.pos_cnum in
     let bind expr lhs rhs=
-      let pat= if !strict then [%pat? ()] else [%pat? _] in
+      default_loc:= lhs.pexp_loc;
+      let pat=
+        with_loc lhs.pexp_loc 
+          (fun ()-> if !strict then [%pat? ()] else [%pat? _])
+      in
       if !debug then
         [%expr Lwt.backtrace_bind
           (fun exn -> try raise exn with exn -> exn)
