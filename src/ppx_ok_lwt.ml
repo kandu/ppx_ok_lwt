@@ -58,11 +58,14 @@ let lwts mapper expr trigger_loc=
 
 let lwtc mapper exp=
   let exp= mapper.expr mapper exp in
-  if !debug then
-    [%expr Lwt.backtrace_catch (fun exn -> try raise exn with exn -> exn)
-      (fun () -> [%e exp]) Lwt.fail]
-  else
-    [%expr Lwt.catch (fun () -> [%e exp]) Lwt.fail]
+  let exp=
+    if !debug then
+      [%expr Lwt.backtrace_catch (fun exn -> try raise exn with exn -> exn)
+        (fun () -> [%e exp]) Lwt.fail]
+    else
+      [%expr Lwt.catch (fun () -> [%e exp]) Lwt.fail]
+  in
+  exp [@metaloc exp.pexp_loc]
 
 
 let ok_lwt_mapper _config _cookies=
