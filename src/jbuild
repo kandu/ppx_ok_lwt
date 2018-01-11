@@ -1,10 +1,10 @@
 (jbuild_version 1)
 
 (library
- ((name ppx_lwts)
-  (public_name ppx_lwts)
+ ((name ppx_ok_lwt)
+  (public_name ppx_ok_lwt)
   (flags (:standard -safe-string))
-  (synopsis "A ppx syntax extension for sequence semantics of lwt")
+  (synopsis "A ppx syntax extension for lwt")
   (libraries
     ( compiler-libs.common
       ocaml-migrate-parsetree

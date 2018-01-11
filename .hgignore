@@ -13,5 +13,5 @@ syntax: glob
 **/*.cm*
 _build
 .merlin
-ppx_lwts.install
+ppx_ok_lwt.install
 

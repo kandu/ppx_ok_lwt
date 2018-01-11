@@ -65,7 +65,7 @@ let lwtc mapper exp=
     [%expr Lwt.catch (fun () -> [%e exp]) Lwt.fail]
 
 
-let lwts_mapper _config _cookies=
+let ok_lwt_mapper _config _cookies=
   { default_mapper with
     expr= fun mapper expr->
       match expr with
@@ -81,13 +81,13 @@ let lwts_mapper _config _cookies=
   }
 
 let args = Arg.[
-  "--lwts-no-debug", Clear debug, " disable debug mode";
-  "--lwts-no-strict", Clear strict, " allow non-unit sequence operations";
+  "--ol-no-debug", Clear debug, " disable debug mode";
+  "--ol-no-strict", Clear strict, " allow non-unit sequence operations";
 ]
 
 let ()= Driver.register
-  ~name:"ppx_lwts"
+  ~name:"ppx_ok_lwt"
   ~args
   (module OCaml_403)
-  lwts_mapper
+  ok_lwt_mapper
 
