@@ -1,8 +1,8 @@
 opam-version: "1.2"
 maintainer: "zandoye@gmail.com"
 authors: [ "ZAN DoYe" ]
-homepage: "https://bitbucket.org/zandoye/ppx_lwts/"
-bug-reports: "https://bitbucket.org/zandoye/ppx_lwts/issues"
+homepage: "https://bitbucket.org/zandoye/ppx_ok_lwt/"
+bug-reports: "https://bitbucket.org/zandoye/ppx_ok_lwt/issues"
 license: "MIT"
 tags: [
   "ppx"
@@ -10,7 +10,7 @@ tags: [
   "monadic"
   "lwt"
 ]
-dev-repo: "hg://https://bitbucket.org/zandoye/ppx_lwts"
+dev-repo: "hg://https://bitbucket.org/zandoye/ppx_ok_lwt"
 build: [
   [make]
 ]

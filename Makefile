@@ -1,4 +1,4 @@
-PROJECT= ppx_lwts
+PROJECT= ppx_ok_lwt
 
 .PHONY: build, install clean
 
