@@ -30,11 +30,15 @@ let lwts mapper expr trigger_loc=
           (fun ()-> if !strict then [%pat? ()] else [%pat? _])
       in
       if !debug then
-        [%expr Lwt.backtrace_bind
-          (fun exn -> try raise exn with exn -> exn)
-          [%e lhs]
-          (fun [%p pat] -> [%e rhs])]
-          [@metaloc expr.pexp_loc]
+        [%expr
+          let module Reraise =
+            struct external reraise : exn -> 'a = "%reraise" end
+          in
+          Lwt.backtrace_bind
+            (fun exn -> try Reraise.reraise exn with exn -> exn)
+            [%e lhs]
+            (fun [%p pat] -> [%e rhs])]
+            [@metaloc expr.pexp_loc]
       else
         [%expr Lwt.bind
           [%e lhs]
@@ -60,8 +64,13 @@ let lwtc mapper exp=
   let exp= mapper.expr mapper exp in
   let exp=
     if !debug then
-      [%expr Lwt.backtrace_catch (fun exn -> try raise exn with exn -> exn)
-        (fun () -> [%e exp]) Lwt.fail]
+      [%expr
+        let module Reraise =
+          struct external reraise : exn -> 'a = "%reraise" end
+        in
+        Lwt.backtrace_catch
+          (fun exn -> try Reraise.reraise exn with exn -> exn)
+          (fun () -> [%e exp]) Lwt.fail]
     else
       [%expr Lwt.catch (fun () -> [%e exp]) Lwt.fail]
   in
