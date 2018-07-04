@@ -24,9 +24,14 @@ let lwts mapper expr trigger_loc=
     let pos_trigger= trigger_loc.Location.loc_start.Lexing.pos_cnum
     and pos_lhs= lhs.pexp_loc.Location.loc_start.Lexing.pos_cnum in
     let bind expr lhs rhs=
-      default_loc:= lhs.pexp_loc;
       let pat=
-        with_loc lhs.pexp_loc 
+        let loc= lhs.pexp_loc in
+        let offset= loc.loc_end.pos_cnum in
+        let loc_start= { loc.loc_start with pos_cnum= offset } in
+        let loc_end= { loc.loc_end with pos_cnum= offset+1 } in
+        let loc_ghost= true in
+        let pat_loc= { loc_start; loc_end; loc_ghost } in
+        with_loc pat_loc
           (fun ()-> if !strict then [%pat? ()] else [%pat? _])
       in
       if !debug then
